@@ -1,0 +1,21 @@
+# Директории сборки CMake и компиляторов
+cmake-build-*/
+build/
+out/
+bin/
+*.exe
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.pdb
+
+_deps/
+
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+Thumbs.db
+.DS_Store
