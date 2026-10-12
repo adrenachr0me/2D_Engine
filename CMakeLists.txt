@@ -19,8 +19,31 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3)
 
+<<<<<<< Updated upstream
 add_executable(${PROJECT_NAME} main.cpp
         engine.cpp
         engine.h)
+=======
+# 1. Wskazanie folderu z plikami nagłówkowymi (.h)
+include_directories(include)
+
+add_executable(${PROJECT_NAME}
+        src/main.cpp
+        src/engine.cpp
+        src/math.cpp
+        src/logs.cpp
+        src/input.cpp
+        src/render.cpp
+        src/timer.cpp
+        src/error_handling.cpp
+
+        include/engine.h
+        include/math.h
+        include/logs.h
+        include/input.h
+        include/timer.h
+        include/render.h
+        include/error_handling.h)
+>>>>>>> Stashed changes
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
