@@ -17,4 +17,4 @@ private:
     float deltaTime = 0.0f;
     float fps = 0.0f;
 };
-#endif //ENGINE2D_TIMER_H
+#endif

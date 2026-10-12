@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     float brightness = 160.0f;
     const bool success = engine.Run([&](float dt)
     {
-        (void)dt; // Available for movement independent of frame rate.
+        (void)dt;
         const Input& input = engine.GetInput();
         if (input.IsKeyDown(SDL_SCANCODE_ESCAPE))
         {

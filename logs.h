@@ -1,7 +1,3 @@
-//
-// Created by telep on 10/10/2026.
-//
-
 #ifndef ENGINE2D_LOGS_H
 #define ENGINE2D_LOGS_H
 #pragma once
@@ -31,4 +27,4 @@ private:
     static void Write(LogLevel level, std::string_view msg);
     static std::ofstream logFile;
 };
-#endif //ENGINE2D_LOGS_H
+#endif

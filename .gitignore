@@ -1,4 +1,3 @@
-# Директории сборки CMake и компиляторов
 cmake-build-*/
 build/
 out/
@@ -20,5 +19,4 @@ cmake-build-release/
 Thumbs.db
 .DS_Store
 
-# Runtime diagnostics
 logs.txt

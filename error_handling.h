@@ -1,7 +1,3 @@
-//
-// Created by telep on 10/10/2026.
-//
-
 #ifndef ENGINE2D_ERROR_HANDLING_H
 #define ENGINE2D_ERROR_HANDLING_H
 #pragma once
@@ -9,7 +5,7 @@
 #include <iostream>
 #include <string_view>
 #include <SDL3/SDL.h>
-#include "logs.h" // Подключаем логгер
+#include "logs.h"
 
 class ErrorHandle
 {
@@ -26,4 +22,4 @@ public:
     }
 };
 
-#endif //ENGINE2D_ERROR_HANDLING_H
+#endif

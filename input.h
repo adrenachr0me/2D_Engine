@@ -1,7 +1,3 @@
-//
-// Created by telep on 10/10/2026.
-//
-
 #ifndef ENGINE2D_INPUT_H
 #define ENGINE2D_INPUT_H
 #pragma once
@@ -32,4 +28,4 @@ public:
     void GetMousePos(float& x, float& y) const;
     float GetMouseWheel() const;
 };
-#endif //ENGINE2D_INPUT_H
+#endif

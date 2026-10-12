@@ -131,7 +131,7 @@ void TestEngine()
     Expect(!engine.Initialize("test", -1, 240, false, 60), "Invalid resolution was accepted");
     Expect(engine.Initialize("test", 320, 240, false, 60), "Headless initialization failed");
     Expect(!engine.Initialize("test", 320, 240, false, 60), "Repeated initialization was accepted");
-    engine.ProcessEvents(); // Drain startup window events before injecting input.
+    engine.ProcessEvents();
     auto key = Key(SDL_EVENT_KEY_DOWN, SDL_SCANCODE_R);
     auto wheel = Wheel(2.0f);
     Expect(SDL_PushEvent(&key) && SDL_PushEvent(&wheel), "Failed to inject input events");

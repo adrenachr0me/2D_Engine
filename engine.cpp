@@ -81,7 +81,6 @@ void Engine::ProcessEvents()
 
 void Engine::Update(float dt)
 {
-    // Game-specific logic is supplied to Run via onUpdate.
     (void)dt;
 }
 
