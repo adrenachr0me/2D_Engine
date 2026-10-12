@@ -19,7 +19,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3)
 
-add_executable(${PROJECT_NAME} main.cpp
+set(ENGINE_SOURCES
         engine.cpp
         engine.h
         math.h
@@ -35,4 +35,19 @@ add_executable(${PROJECT_NAME} main.cpp
         error_handling.h
         error_handling.cpp)
 
+add_executable(${PROJECT_NAME} main.cpp ${ENGINE_SOURCES})
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(engine_tests tests/engine_tests.cpp ${ENGINE_SOURCES})
+    target_include_directories(engine_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(engine_tests PRIVATE SDL3::SDL3)
+    add_test(NAME lab01_engine COMMAND engine_tests)
+    set_tests_properties(lab01_engine PROPERTIES
+        ENVIRONMENT "SDL_VIDEODRIVER=dummy;SDL_RENDER_DRIVER=software"
+        TIMEOUT 15)
+    add_test(NAME lab01_help COMMAND Engine2D --help)
+    add_test(NAME lab01_invalid_fps COMMAND Engine2D --fps 0)
+    set_tests_properties(lab01_invalid_fps PROPERTIES WILL_FAIL TRUE)
+endif()

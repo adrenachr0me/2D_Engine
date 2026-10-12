@@ -1,12 +1,16 @@
 #include "logs.h"
 #include <iostream>
+#include <string>
 #include <SDL3/SDL.h>
 
 std::ofstream Log::logFile;
 
 bool Log::Init(std::string_view filename)
 {
-    logFile.open(filename.data(), std::ios::out | std::ios::trunc);
+    if (logFile.is_open())
+        Shutdown();
+    logFile.clear();
+    logFile.open(std::string(filename), std::ios::out | std::ios::trunc);
     if (!logFile.is_open())
     {
         std::cerr << "[ERROR] Nie udalo sie otworzyc pliku logow: " << filename << '\n';

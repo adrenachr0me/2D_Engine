@@ -17,9 +17,13 @@ private:
     float mouseX = 0.0f;
     float mouseY = 0.0f;
     float wheelY = 0.0f;
+    bool keyboardEnabled = true;
+    bool mouseEnabled = true;
 
 public:
     Input() = default;
+    void SetEnabled(bool keyboard, bool mouse);
+    void Reset();
     void HandleEvent(const SDL_Event& event);
     void EndFrame();
 

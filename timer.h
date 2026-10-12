@@ -7,6 +7,7 @@
 class Timer {
 public:
     Timer();
+    void Reset();
     void Tick();
     float GetDT() const;
     float GetFPS() const;
