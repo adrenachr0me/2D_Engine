@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "error_handling.h"
 #include "logs.h"
+
 class Engine
 {
 private:
@@ -24,6 +25,7 @@ private:
     Input input;
     Timer timer;
 
+
 public:
 
     Engine();
@@ -37,7 +39,6 @@ public:
         int fps);
 
     void Run();
-
     void ProcessEvents();
     void Update(float dt);
     void Render();

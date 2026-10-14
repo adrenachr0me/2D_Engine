@@ -5,4 +5,7 @@
 #ifndef ENGINE2D_RENDER_H
 #define ENGINE2D_RENDER_H
 
+#pragma once
+
+
 #endif //ENGINE2D_RENDER_H

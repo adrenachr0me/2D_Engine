@@ -24,13 +24,10 @@ bool Engine::Initialize(
     height = h;
     fullscreen = fs;
     fps = targetFPS;
-
+    Log::Init("logs.txt");
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
-        std::cerr << "SDL Error: "
-                  << SDL_GetError()
-                  << std::endl;
-
+        ErrorHandle::SDLError("Failed to initialize SDL");
         return false;
     }
 
@@ -47,10 +44,7 @@ bool Engine::Initialize(
 
     if (window == nullptr)
     {
-        std::cerr << "Window Error: "
-                  << SDL_GetError()
-                  << std::endl;
-
+        ErrorHandle::SDLError("Failed to create window");
         return false;
     }
 
@@ -60,22 +54,18 @@ bool Engine::Initialize(
 
     if (renderer == nullptr)
     {
-        std::cerr << "Renderer Error: "
-                  << SDL_GetError()
-                  << std::endl;
-
+        ErrorHandle::SDLError("Failed to create renderer");
         return false;
     }
 
     running = true;
-
+    Log::Info("Engine initialized successfully");
     return true;
 }
 
 void Engine::ProcessEvents()
 {
     SDL_Event event;
-
     while (SDL_PollEvent(&event))
     {
         if (event.type == SDL_EVENT_QUIT)
@@ -83,25 +73,18 @@ void Engine::ProcessEvents()
             running = false;
         }
 
-        if (event.type == SDL_EVENT_KEY_DOWN)
-        {
-            std::cout << "Klawisz nacisniety\n";
-        }
-
-        if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
-        {
-            std::cout << "Klikniecie myszy\n";
-        }
+        input.HandleEvent(event);
     }
 }
 
-void Engine::Update()
+void Engine::Update(float dt)
 {
+
 }
 
 void Engine::Render()
 {
-    ClearScreen(30, 30, 30);
+    ClearScreen(30,30,30);
     SDL_RenderPresent(renderer);
 }
 
@@ -127,9 +110,11 @@ void Engine::Run()
         Uint32 frameStart =
             SDL_GetTicks();
 
+        timer.Tick();
+
         ProcessEvents();
 
-        Update();
+        Update(timer.GetDT());
 
         Render();
 
@@ -159,4 +144,5 @@ void Engine::Shutdown()
     }
 
     SDL_Quit();
+    Log::Shutdown();
 }
