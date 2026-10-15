@@ -1,3 +1,0 @@
-//
-// Created by telep on 10/10/2026.
-//

@@ -35,8 +35,8 @@ add_executable(${PROJECT_NAME}
         include/core/timer.h
 
         # Grafika (graphics)
-        src/graphics/render.cpp
-        include/graphics/render.h
+        src/graphics/primitiverenderer.cpp
+        include/graphics/primitiverenderer.h
 
         # system
         src/system/math.cpp
@@ -47,6 +47,10 @@ add_executable(${PROJECT_NAME}
         include/system/input.h
         src/system/error_handling.cpp
         include/system/error_handling.h
+        src/system/point2D.cpp
+        include/system/point2D.h
+        include/graphics/linesegment.h
+        src/graphics/linesegment.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)

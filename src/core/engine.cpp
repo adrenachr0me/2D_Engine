@@ -1,10 +1,12 @@
 #include "engine.h"
+#include "LineSegment.h"
 #include <iostream>
 
 Engine::Engine()
 {
     window = nullptr;
     renderer = nullptr;
+    primitiveRenderer = nullptr;
     running = false;
 }
 
@@ -57,6 +59,7 @@ bool Engine::Initialize(
         ErrorHandle::SDLError("Failed to create renderer");
         return false;
     }
+    primitiveRenderer = new PrimitiveRenderer(renderer);
 
     running = true;
     Log::Info("Engine initialized successfully");
@@ -85,6 +88,37 @@ void Engine::Update(float dt)
 void Engine::Render()
 {
     ClearScreen(30,30,30);
+
+    SDL_Color red ={255,0,0,255};
+
+    SDL_Color green ={0,255,0,255};
+
+    Point2D point(
+        150.0f,
+        250.0f);
+
+    point.Draw(
+        *primitiveRenderer,
+        green);
+
+    LineSegment line1(
+    Point2D(400,300),
+    Point2D(400,0));
+
+    line1.Draw(
+        *primitiveRenderer,
+        red,
+        false);
+
+    LineSegment line2(
+    Point2D(100,200),
+    Point2D(500,200));
+
+    line2.Draw(
+        *primitiveRenderer,
+        green,
+        true);
+
     SDL_RenderPresent(renderer);
 }
 
@@ -103,6 +137,9 @@ void Engine::ClearScreen(
 
 void Engine::Run()
 {
+    if (fps <= 0)
+        fps = 60;
+
     Uint32 frameDelay = 1000 / fps;
 
     while (running)
@@ -131,6 +168,12 @@ void Engine::Run()
 
 void Engine::Shutdown()
 {
+    if (primitiveRenderer)
+    {
+        delete primitiveRenderer;
+        primitiveRenderer = nullptr;
+    }
+
     if (renderer)
     {
         SDL_DestroyRenderer(renderer);

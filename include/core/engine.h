@@ -5,6 +5,8 @@
 #include "input.h"
 #include "timer.h"
 #include "error_handling.h"
+#include "PrimitiveRenderer.h"
+#include"point2D.h"
 #include "logs.h"
 
 class Engine
@@ -13,6 +15,7 @@ private:
 
     SDL_Window* window;
     SDL_Renderer* renderer;
+    PrimitiveRenderer* primitiveRenderer;
 
     bool running;
 
