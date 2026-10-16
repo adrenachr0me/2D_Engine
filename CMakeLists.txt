@@ -19,20 +19,38 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3)
 
-add_executable(${PROJECT_NAME} main.cpp
-        engine.cpp
-        engine.h
-        math.h
-        logs.h
-        input.h
-        timer.h
-        render.h
-        math.cpp
-        logs.cpp
-        input.cpp
-        render.cpp
-        timer.cpp
-        error_handling.h
-        error_handling.cpp)
+# 1. Wskazanie folderu z plikami nagłówkowymi (.h)
+include_directories(include
+        include/core
+        include/graphics
+        include/system)
+
+add_executable(${PROJECT_NAME}
+        src/main.cpp
+
+        # Logika rdzenia (core)
+        src/core/engine.cpp
+        include/core/engine.h
+        src/core/timer.cpp
+        include/core/timer.h
+
+        # Grafika (graphics)
+        src/graphics/primitiverenderer.cpp
+        include/graphics/primitiverenderer.h
+
+        # system
+        src/system/math.cpp
+        include/system/math.h
+        src/system/logs.cpp
+        include/system/logs.h
+        src/system/input.cpp
+        include/system/input.h
+        src/system/error_handling.cpp
+        include/system/error_handling.h
+        src/system/point2D.cpp
+        include/system/point2D.h
+        include/graphics/linesegment.h
+        src/graphics/linesegment.cpp
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
