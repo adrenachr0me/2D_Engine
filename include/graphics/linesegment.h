@@ -1,6 +1,4 @@
-//
-// Created by Olek on 15.10.2026.
-//
+
 
 #ifndef ENGINE2D_LINESEGMENT_H
 #define ENGINE2D_LINESEGMENT_H

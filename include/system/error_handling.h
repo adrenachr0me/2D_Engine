@@ -1,6 +1,4 @@
-//
-// Created by telep on 10/10/2026.
-//
+
 
 #ifndef ENGINE2D_ERROR_HANDLING_H
 #define ENGINE2D_ERROR_HANDLING_H

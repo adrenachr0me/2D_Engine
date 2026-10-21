@@ -1,6 +1,4 @@
-//
-// Created by telep on 10/10/2026.
-//
+
 
 #include "PrimitiveRenderer.h"
 #include<math.h>
@@ -110,6 +108,35 @@ void PrimitiveRenderer::DrawLineIncremental(
         }
     }
 }
+
+void PrimitiveRenderer::DrawPolilane(const std::vector<Point2D>& points, bool isClosed, SDL_Color color) {
+    if (points.size() < 2)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < points.size() - 1; ++i)
+    {
+        DrawLineSDL(
+            points[i].GetX(),
+            points[i].GetY(),
+            points[i + 1].GetX(),
+            points[i + 1].GetY(),
+            color
+        );
+    }
+
+    if (isClosed)
+    {
+        DrawLineSDL(
+            points.back().GetX(),
+            points.back().GetY(),
+            points.front().GetX(),
+            points.front().GetY(),
+            color
+        );
+    }
+};
 
 void PrimitiveRenderer::DrawPoint(
     float x,

@@ -1,6 +1,4 @@
-//
-// Created by Olek on 15.10.2026.
-//
+
 
 #include "Point2D.h"
 #include "PrimitiveRenderer.h"

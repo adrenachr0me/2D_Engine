@@ -6,6 +6,8 @@
 #define ENGINE2D_RENDER_H
 
 #include <SDL3/SDL.h>
+#include <vector>
+#include "point2D.h"
 #pragma once
 
 class PrimitiveRenderer
@@ -34,6 +36,9 @@ public:
     float x,
     float y,
     SDL_Color color);
+
+
+    void DrawPolilane(const std::vector<Point2D>& points, bool isClosed, SDL_Color color);
 };
 
 #endif //ENGINE2D_RENDER_H
