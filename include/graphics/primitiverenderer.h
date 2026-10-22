@@ -39,6 +39,11 @@ public:
 
 
     void DrawPolilane(const std::vector<Point2D>& points, bool isClosed, SDL_Color color);
+    void DrawCircle(float x0, float y0, int r, SDL_Color color);
+    void DrawElipse(float x0, float y0, int r_x, int r_y, SDL_Color color);
+    void DrawPolygon(const std::vector<Point2D>& points, SDL_Color color);
+
 };
+
 
 #endif //ENGINE2D_RENDER_H

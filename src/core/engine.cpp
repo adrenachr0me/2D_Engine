@@ -118,7 +118,13 @@ void Engine::Render()
         *primitiveRenderer,
         green,
         true);
-
+    std::vector<Point2D>points;
+    points.emplace_back(100.0f, 150.0f);
+    points.emplace_back(200.0f, 250.0f);
+    points.emplace_back(150.0f, 300.0f);
+    primitiveRenderer->DrawPolilane(points, true, red);
+    primitiveRenderer->DrawCircle(400,600, 200, red);
+    primitiveRenderer->DrawElipse(1000,300, 200, 400, red);
     SDL_RenderPresent(renderer);
 }
 

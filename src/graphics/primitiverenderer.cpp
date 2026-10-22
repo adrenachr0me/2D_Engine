@@ -3,6 +3,7 @@
 #include "PrimitiveRenderer.h"
 #include<math.h>
 #include <algorithm>
+#include <cmath>
 
 PrimitiveRenderer::PrimitiveRenderer(SDL_Renderer* r)
 {
@@ -138,6 +139,7 @@ void PrimitiveRenderer::DrawPolilane(const std::vector<Point2D>& points, bool is
     }
 };
 
+
 void PrimitiveRenderer::DrawPoint(
     float x,
     float y,
@@ -154,4 +156,42 @@ void PrimitiveRenderer::DrawPoint(
         renderer,
         x,
         y);
+}
+void PrimitiveRenderer::DrawCircle(float x0, float y0, int r, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(
+        renderer,
+        color.r,
+        color.g,
+        color.b,
+        color.a);
+    const float PI = 3.1415926535f;
+
+    for (float alpha = 0.0; alpha <= PI / 2.0; alpha += 0.01)
+    {
+        float dx = std::round(r * std::cos(alpha));
+        float dy = std::round(r * std::sin(alpha));
+        DrawPoint(x0 + dx,y0 + dy,color);
+        DrawPoint(x0 - dx,y0 + dy,color);
+        DrawPoint(x0-dx,y0 - dy,color);
+        DrawPoint(x0+dx,y0-dy,color);
+    }
+}
+void PrimitiveRenderer::DrawElipse(float x0, float y0, int  r_x, int r_y, SDL_Color color) {
+    SDL_SetRenderDrawColor(
+        renderer,
+        color.r,
+        color.g,
+        color.b,
+        color.a);
+    const float PI = 3.1415926535f;
+
+    for (float alpha = 0.0; alpha <= PI / 2.0; alpha += 0.01) {
+        float dx = std::round(r_x * std::cos(alpha));
+        float dy = std::round(r_y * std::sin(alpha));
+        DrawPoint(x0 + dx,y0 + dy,color);
+        DrawPoint(x0 - dx,y0 + dy,color);
+        DrawPoint(x0-dx,y0 - dy,color);
+        DrawPoint(x0+dx,y0-dy,color);
+    }
 }
