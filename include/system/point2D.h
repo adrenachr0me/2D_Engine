@@ -28,5 +28,6 @@ public:
     void Draw(
         PrimitiveRenderer& renderer,
         SDL_Color color) const;
+
 };
 #endif //ENGINE2D_POINT2D_H

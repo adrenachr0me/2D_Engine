@@ -6,8 +6,8 @@
 
 #include <SDL3/SDL.h>
 #include "Point2D.h"
-#include "PrimitiveRenderer.h"
 
+class PrimitiveRenderer;
 class LineSegment
 {
 private:
@@ -34,6 +34,9 @@ public:
         PrimitiveRenderer& renderer,
         SDL_Color color,
         bool incremental = false) const;
+    float Orientation(const Point2D& a, const Point2D& b, const Point2D& c);
+    bool OnSegment(const Point2D& p, const Point2D& q, const Point2D& r);
+    static bool DoIntersect(const Point2D& p1, const Point2D& q1, const Point2D& p2, const Point2D& q2);
 };
 
 #endif //ENGINE2D_LINESEGMENT_H
