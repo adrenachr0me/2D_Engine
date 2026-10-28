@@ -35,11 +35,11 @@ void LineSegment::SetEndPoint(
 {
     endPoint = end;
 }
-
-void LineSegment::Draw(
-    PrimitiveRenderer& renderer,
-    SDL_Color color,
-    bool incremental) const
+void LineSegment::Draw(PrimitiveRenderer& renderer)
+{
+    Draw(renderer, false, color);
+}
+void LineSegment::Draw(PrimitiveRenderer& renderer,bool incremental, SDL_Color color) const
 {
     if (incremental)
     {
@@ -59,6 +59,35 @@ void LineSegment::Draw(
             endPoint.GetY(),
             color);
     }
+}
+void LineSegment::Translate(float tx, float ty)
+{
+    startPoint.Translate(tx, ty);
+    endPoint.Translate(tx, ty);
+}
+
+void LineSegment::Rotate(float alpha)
+{
+    startPoint.Rotate(alpha);
+    endPoint.Rotate(alpha);
+}
+
+void LineSegment::Rotate(float alpha, const Point2D& center)
+{
+    startPoint.Rotate(alpha, center);
+    endPoint.Rotate(alpha, center);
+}
+
+void LineSegment::Scale(float kx, float ky)
+{
+    startPoint.Scale(kx, ky);
+    endPoint.Scale(kx, ky);
+}
+
+void LineSegment::Scale(float kx, float ky, const Point2D& center)
+{
+    startPoint.Scale(kx, ky, center);
+    endPoint.Scale(kx, ky, center);
 }
 float Orientation(const Point2D& a, const Point2D& b, const Point2D& c)
 {

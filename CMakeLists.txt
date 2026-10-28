@@ -47,10 +47,11 @@ add_executable(${PROJECT_NAME}
         include/system/input.h
         src/system/error_handling.cpp
         include/system/error_handling.h
-        src/system/point2D.cpp
-        include/system/point2D.h
+        src/graphics/point2D.cpp
+        include/graphics/point2D.h
         include/graphics/linesegment.h
         src/graphics/linesegment.cpp
+        include/core/object_hierarchy.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
