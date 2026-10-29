@@ -8,7 +8,7 @@
 #include "PrimitiveRenderer.h"
 #include "../graphics/point2D.h"
 #include "logs.h"
-
+#include "game/player.h"
 class Engine
 {
 private:
@@ -27,7 +27,7 @@ private:
 
     Input input;
     Timer timer;
-
+    Player* player;
 
 public:
 

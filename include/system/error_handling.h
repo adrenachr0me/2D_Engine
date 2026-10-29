@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string_view>
 #include <SDL3/SDL.h>
-#include "logs.h" // Подключаем логгер
+#include "logs.h"
 
 class ErrorHandle
 {

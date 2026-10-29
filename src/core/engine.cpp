@@ -60,7 +60,7 @@ bool Engine::Initialize(
         return false;
     }
     primitiveRenderer = new PrimitiveRenderer(renderer);
-
+    player = new Player(width / 2.0f, height / 2.0f, input);
     running = true;
     Log::Info("Engine initialized successfully");
     return true;
@@ -82,7 +82,9 @@ void Engine::ProcessEvents()
 
 void Engine::Update(float dt)
 {
-
+    if (player) {
+        player->Update(dt);
+    }
 }
 
 void Engine::Render()
@@ -96,10 +98,9 @@ void Engine::Render()
     Point2D point(
         150.0f,
         250.0f);
-
+    point.SetColor(green);
     point.Draw(
-        *primitiveRenderer,
-        green);
+        *primitiveRenderer);
 
     LineSegment line1(
     Point2D(400,300),
@@ -107,8 +108,8 @@ void Engine::Render()
 
     line1.Draw(
         *primitiveRenderer,
-        red,
-        false);
+        false,
+        red);
 
     LineSegment line2(
     Point2D(100,200),
@@ -116,8 +117,8 @@ void Engine::Render()
 
     line2.Draw(
         *primitiveRenderer,
-        green,
-        true);
+        true,
+        green);
     std::vector<Point2D>points;
     points.emplace_back(100.0f, 150.0f);
     points.emplace_back(200.0f, 250.0f);
@@ -125,6 +126,11 @@ void Engine::Render()
     primitiveRenderer->DrawPolilane(points, true, red);
     primitiveRenderer->DrawCircle(400,600, 200, red);
     primitiveRenderer->DrawElipse(1000,300, 200, 400, red);
+    if (player)
+    {
+        player->Draw(*primitiveRenderer);
+    }
+
     SDL_RenderPresent(renderer);
 }
 
@@ -160,6 +166,7 @@ void Engine::Run()
         Update(timer.GetDT());
 
         Render();
+        input.EndFrame();
 
         Uint32 frameTime =
             SDL_GetTicks() - frameStart;
@@ -174,6 +181,10 @@ void Engine::Run()
 
 void Engine::Shutdown()
 {
+    if (player) {
+        delete player;
+        player = nullptr;
+    }
     if (primitiveRenderer)
     {
         delete primitiveRenderer;

@@ -29,8 +29,8 @@ public:
 
     void SetEndPoint(
         const Point2D& end);
-    float Orientation(const Point2D& a, const Point2D& b, const Point2D& c);
-    bool OnSegment(const Point2D& p, const Point2D& q, const Point2D& r);
+    static float Orientation(const Point2D& a, const Point2D& b, const Point2D& c);
+    static bool OnSegment(const Point2D& p, const Point2D& q, const Point2D& r);
     static bool DoIntersect(const Point2D& p1, const Point2D& q1, const Point2D& p2, const Point2D& q2);
     void Draw(PrimitiveRenderer& renderer, bool incremental, SDL_Color color) const;
     void Draw(PrimitiveRenderer& renderer) override;
