@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <queue>
-
+#include "../../include/graphics/bitmap_handler.h"
 PrimitiveRenderer::PrimitiveRenderer(SDL_Renderer* r)
 {
     renderer = r;
@@ -406,4 +406,58 @@ void PrimitiveRenderer::FloodFill(Point2D seed, SDL_Color fillColor, SDL_Color b
         q.emplace(x + 1, y);
     }
     SDL_DestroySurface(snapshot);
+}
+void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y, float scale, float angleDeg)
+{
+    if (!renderer || !bitmap.isValid())
+        return;
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, bitmap.GetRawSurface());
+    if (!texture)
+        return;
+
+    float w = bitmap.GetWidth() * scale;
+    float h = bitmap.GetHeight() * scale;
+
+    SDL_FRect dstRect = {
+        x - w / 2.0f,
+        y - h / 2.0f,
+        w,
+        h
+    };
+
+    SDL_RenderTextureRotated(renderer, texture, nullptr, &dstRect, angleDeg, nullptr, SDL_FLIP_NONE);
+
+    SDL_DestroyTexture(texture);
+}
+
+void PrimitiveRenderer::DrawBitmapFragment(const BitmapHandler& bitmap, const SDL_Rect& srcRect, float x, float y, float scale, float angleDeg)
+{
+    if (!renderer || !bitmap.isValid())
+        return;
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, bitmap.GetRawSurface());
+    if (!texture)
+        return;
+
+    SDL_FRect fSrcRect = {
+        static_cast<float>(srcRect.x),
+        static_cast<float>(srcRect.y),
+        static_cast<float>(srcRect.w),
+        static_cast<float>(srcRect.h)
+    };
+
+    float w = fSrcRect.w * scale;
+    float h = fSrcRect.h * scale;
+
+    SDL_FRect dstRect = {
+        x - w / 2.0f,
+        y - h / 2.0f,
+        w,
+        h
+    };
+
+    SDL_RenderTextureRotated(renderer, texture, &fSrcRect, &dstRect, angleDeg, nullptr, SDL_FLIP_NONE);
+
+    SDL_DestroyTexture(texture);
 }

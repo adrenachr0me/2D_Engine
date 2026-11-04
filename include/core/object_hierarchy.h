@@ -4,7 +4,8 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-
+#include <vector>
+#include "graphics/bitmap_handler.h"
 class PrimitiveRenderer;
 class Point2D;
 
@@ -50,5 +51,31 @@ public:
 
     void SetColor(SDL_Color c) { color = c; }
     SDL_Color GetColor() const { return color; }
+};
+class AnimatedObject : virtual public GameObject{
+public:
+    virtual ~AnimatedObject() = default;
+    virtual void Animate(float deltaTime) = 0;
+};
+
+class BitmapObject : public DrawableObject, public TransformableObject {
+protected:
+    Point2D* position{nullptr};
+    float rotationAngle{0.0f};
+    float scaleFactor{1.0f};
+    std::vector<const BitmapHandler*> bitmaps;
+public:
+    BitmapObject();
+    BitmapObject(float x, float y);
+    virtual ~BitmapObject();
+    void AddBitmap(const BitmapHandler* bitmap);
+    void Translate(float tx, float ty) override;
+    void Rotate(float alpha) override;
+    void Rotate(float alpha, const Point2D& center) override;
+    void Scale(float kx, float ky) override;
+    void Scale(float kx, float ky, const Point2D& center) override;
+
+    void Draw(PrimitiveRenderer& renderer) override;
+
 };
 #endif

@@ -54,6 +54,9 @@ add_executable(${PROJECT_NAME}
         include/core/object_hierarchy.h
         include/game/player.h
         src/game/player.cpp
+        include/graphics/bitmap_handler.h
+        src/graphics/bitmap_handler.cpp
+        src/core/object_hierarchy.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)

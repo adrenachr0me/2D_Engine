@@ -17,6 +17,7 @@ private:
     void SetPixelColor(SDL_Surface* surface, int x, int y, SDL_Color color);
 public:
     PrimitiveRenderer(SDL_Renderer* r);
+    SDL_Renderer* GetRawRenderer() const { return renderer; }
     bool ColorsMatch(const SDL_Color& c1, const SDL_Color& c2);
     void DrawLineSDL(
         float x1,
@@ -48,6 +49,8 @@ public:
 
     void BoundaryFill(Point2D seed, SDL_Color fillColor, SDL_Color boundaryColor);
     void FloodFill(Point2D seed, SDL_Color fillColor, SDL_Color backgroundColor);
+    void DrawBitmap(const class BitmapHandler& bitmap, float x, float y, float scale = 1.0f, float angleDeg = 0.0f);
+    void DrawBitmapFragment(const class BitmapHandler& bitmap, const SDL_Rect& srcRect, float x, float y, float scale = 1.0f, float angleDeg = 0.0f);
 };
 
 
