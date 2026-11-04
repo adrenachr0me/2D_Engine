@@ -7,7 +7,6 @@
 class Timer {
 public:
     Timer();
-    void Reset();
     void Tick();
     float GetDT() const;
     float GetFPS() const;
@@ -17,4 +16,4 @@ private:
     float deltaTime = 0.0f;
     float fps = 0.0f;
 };
-#endif
+#endif //ENGINE2D_TIMER_H

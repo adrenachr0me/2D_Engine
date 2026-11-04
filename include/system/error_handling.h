@@ -1,3 +1,5 @@
+
+
 #ifndef ENGINE2D_ERROR_HANDLING_H
 #define ENGINE2D_ERROR_HANDLING_H
 #pragma once
@@ -22,4 +24,4 @@ public:
     }
 };
 
-#endif
+#endif //ENGINE2D_ERROR_HANDLING_H

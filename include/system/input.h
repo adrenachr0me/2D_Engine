@@ -1,3 +1,5 @@
+
+
 #ifndef ENGINE2D_INPUT_H
 #define ENGINE2D_INPUT_H
 #pragma once
@@ -13,13 +15,9 @@ private:
     float mouseX = 0.0f;
     float mouseY = 0.0f;
     float wheelY = 0.0f;
-    bool keyboardEnabled = true;
-    bool mouseEnabled = true;
 
 public:
     Input() = default;
-    void SetEnabled(bool keyboard, bool mouse);
-    void Reset();
     void HandleEvent(const SDL_Event& event);
     void EndFrame();
 
@@ -28,4 +26,4 @@ public:
     void GetMousePos(float& x, float& y) const;
     float GetMouseWheel() const;
 };
-#endif
+#endif //ENGINE2D_INPUT_H

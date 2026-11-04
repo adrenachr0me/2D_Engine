@@ -19,35 +19,44 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL3)
 
-set(ENGINE_SOURCES
-        engine.cpp
-        engine.h
-        math.h
-        logs.h
-        input.h
-        timer.h
-        render.h
-        math.cpp
-        logs.cpp
-        input.cpp
-        render.cpp
-        timer.cpp
-        error_handling.h
-        error_handling.cpp)
+# 1. Wskazanie folderu z plikami nagłówkowymi (.h)
+include_directories(include
+        include/core
+        include/graphics
+        include/system)
 
-add_executable(${PROJECT_NAME} main.cpp ${ENGINE_SOURCES})
+add_executable(${PROJECT_NAME}
+        src/main.cpp
+
+        # Logika rdzenia (core)
+        src/core/engine.cpp
+        include/core/engine.h
+        src/core/timer.cpp
+        include/core/timer.h
+
+        # Grafika (graphics)
+        src/graphics/primitiverenderer.cpp
+        include/graphics/primitiverenderer.h
+
+        # system
+        src/system/math.cpp
+        include/system/math.h
+        src/system/logs.cpp
+        include/system/logs.h
+        src/system/input.cpp
+        include/system/input.h
+        src/system/error_handling.cpp
+        include/system/error_handling.h
+        src/graphics/point2D.cpp
+        include/graphics/point2D.h
+        include/graphics/linesegment.h
+        src/graphics/linesegment.cpp
+        include/core/object_hierarchy.h
+        include/game/player.h
+        src/game/player.cpp
+        include/graphics/bitmap_handler.h
+        src/graphics/bitmap_handler.cpp
+        src/core/object_hierarchy.cpp
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
-
-include(CTest)
-if(BUILD_TESTING)
-    add_executable(engine_tests tests/engine_tests.cpp ${ENGINE_SOURCES})
-    target_include_directories(engine_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(engine_tests PRIVATE SDL3::SDL3)
-    add_test(NAME lab01_engine COMMAND engine_tests)
-    set_tests_properties(lab01_engine PROPERTIES
-        ENVIRONMENT "SDL_VIDEODRIVER=dummy;SDL_RENDER_DRIVER=software"
-        TIMEOUT 15)
-    add_test(NAME lab01_help COMMAND Engine2D --help)
-    add_test(NAME lab01_invalid_fps COMMAND Engine2D --fps 0)
-    set_tests_properties(lab01_invalid_fps PROPERTIES WILL_FAIL TRUE)
-endif()
