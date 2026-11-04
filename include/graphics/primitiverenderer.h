@@ -50,6 +50,7 @@ public:
     void BoundaryFill(Point2D seed, SDL_Color fillColor, SDL_Color boundaryColor);
     void FloodFill(Point2D seed, SDL_Color fillColor, SDL_Color backgroundColor);
     void DrawBitmap(const class BitmapHandler& bitmap, float x, float y, float scale = 1.0f, float angleDeg = 0.0f);
+    void DrawBitmap(const class BitmapHandler& bitmap, float x, float y, float scaleX, float scaleY, float angleDeg);
     void DrawBitmapFragment(const class BitmapHandler& bitmap, const SDL_Rect& srcRect, float x, float y, float scale = 1.0f, float angleDeg = 0.0f);
 };
 

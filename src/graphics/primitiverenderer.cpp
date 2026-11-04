@@ -409,6 +409,11 @@ void PrimitiveRenderer::FloodFill(Point2D seed, SDL_Color fillColor, SDL_Color b
 }
 void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y, float scale, float angleDeg)
 {
+    DrawBitmap(bitmap, x, y, scale, scale, angleDeg);
+}
+
+void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y, float scaleX, float scaleY, float angleDeg)
+{
     if (!renderer || !bitmap.isValid())
         return;
 
@@ -416,8 +421,10 @@ void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y
     if (!texture)
         return;
 
-    float w = bitmap.GetWidth() * scale;
-    float h = bitmap.GetHeight() * scale;
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+    float w = bitmap.GetWidth() * std::abs(scaleX);
+    float h = bitmap.GetHeight() * std::abs(scaleY);
 
     SDL_FRect dstRect = {
         x - w / 2.0f,
@@ -426,7 +433,9 @@ void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y
         h
     };
 
-    SDL_RenderTextureRotated(renderer, texture, nullptr, &dstRect, angleDeg, nullptr, SDL_FLIP_NONE);
+    const auto flip = static_cast<SDL_FlipMode>((scaleX < 0 ? SDL_FLIP_HORIZONTAL : 0) |
+                                               (scaleY < 0 ? SDL_FLIP_VERTICAL : 0));
+    SDL_RenderTextureRotated(renderer, texture, nullptr, &dstRect, angleDeg, nullptr, flip);
 
     SDL_DestroyTexture(texture);
 }

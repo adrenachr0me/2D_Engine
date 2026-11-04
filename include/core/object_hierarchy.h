@@ -63,11 +63,14 @@ protected:
     Point2D* position{nullptr};
     float rotationAngle{0.0f};
     float scaleFactor{1.0f};
+    float scaleFactorY{1.0f};
     std::vector<const BitmapHandler*> bitmaps;
 public:
     BitmapObject();
     BitmapObject(float x, float y);
     virtual ~BitmapObject();
+    BitmapObject(const BitmapObject&) = delete;
+    BitmapObject& operator=(const BitmapObject&) = delete;
     void AddBitmap(const BitmapHandler* bitmap);
     void Translate(float tx, float ty) override;
     void Rotate(float alpha) override;
@@ -77,5 +80,22 @@ public:
 
     void Draw(PrimitiveRenderer& renderer) override;
 
+};
+
+class SpriteObject : public BitmapObject, public AnimatedObject {
+private:
+    std::size_t firstFrame{0};
+    std::size_t frameCount{0};
+    std::size_t currentFrame{0};
+    float elapsed{0.0f};
+    float frameDuration{0.125f};
+    bool animating{false};
+public:
+    using BitmapObject::BitmapObject;
+    bool SetAnimation(std::size_t first, std::size_t count);
+    void SetAnimating(bool enabled);
+    void Animate(float deltaTime) override;
+    void Draw(PrimitiveRenderer& renderer) override;
+    std::size_t GetCurrentFrame() const { return currentFrame; }
 };
 #endif

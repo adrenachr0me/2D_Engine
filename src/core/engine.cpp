@@ -7,6 +7,7 @@ Engine::Engine()
     window = nullptr;
     renderer = nullptr;
     primitiveRenderer = nullptr;
+    player = nullptr;
     running = false;
 }
 
@@ -61,6 +62,11 @@ bool Engine::Initialize(
     }
     primitiveRenderer = new PrimitiveRenderer(renderer);
     player = new Player(width / 2.0f, height / 2.0f, input);
+    if (!player->HasSprites()) {
+        ErrorHandle::SDLError("Failed to load assets/player.bmp");
+        Shutdown();
+        return false;
+    }
     running = true;
     Log::Info("Engine initialized successfully");
     return true;

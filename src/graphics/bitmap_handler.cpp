@@ -1,6 +1,14 @@
 #include "graphics/bitmap_handler.h"
 #include <iostream>
 
+namespace {
+bool Contains(SDL_Surface* surface, const SDL_Rect& area) {
+    return surface && area.x >= 0 && area.y >= 0 && area.w > 0 && area.h > 0 &&
+           area.w <= surface->w && area.h <= surface->h &&
+           area.x <= surface->w - area.w && area.y <= surface->h - area.h;
+}
+}
+
 BitmapHandler::BitmapHandler(int width, int height) {
     create_bitmap(width, height);
 };
@@ -32,6 +40,9 @@ bool BitmapHandler::create_bitmap(int width, int height) {
         return false;
     }
     surface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGBA32);
+    if (surface && !SDL_FillSurfaceRect(surface, nullptr, SDL_MapSurfaceRGBA(surface, 0, 0, 0, 0))) {
+        delete_bitmap();
+    }
     return surface != nullptr;
 };
 void BitmapHandler::delete_bitmap() {
@@ -57,11 +68,25 @@ bool BitmapHandler::copy_bitmap(const BitmapHandler& source, const SDL_Rect* src
     if (!surface || !source.surface) {
         return false;
     }
-    return SDL_BlitSurface(source.surface, srcRect, surface, dstRect);
+    const SDL_Rect from = srcRect ? *srcRect : SDL_Rect{0, 0, source.surface->w, source.surface->h};
+    const SDL_Rect to = dstRect ? *dstRect : SDL_Rect{0, 0, from.w, from.h};
+    if (!Contains(source.surface, from) || !Contains(surface, to) || from.w != to.w || from.h != to.h)
+        return false;
+    if (surface == source.surface) {
+        BitmapHandler temporary(from.w, from.h);
+        return temporary.copy_bitmap(source, &from) && copy_bitmap(temporary, nullptr, &to);
+    }
+    SDL_BlendMode previous;
+    if (!SDL_GetSurfaceBlendMode(source.surface, &previous) ||
+        !SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE))
+        return false;
+    const bool copied = SDL_BlitSurface(source.surface, &from, surface, &to);
+    SDL_SetSurfaceBlendMode(source.surface, previous);
+    return copied;
 }
 bool BitmapHandler::LoadFragment(const std::string& filepath, const SDL_Rect& sourceRect) {
     BitmapHandler fullImage(filepath);
-    if (!fullImage.isValid()) {
+    if (!Contains(fullImage.surface, sourceRect)) {
         return false;
     }
     if (!create_bitmap(sourceRect.w, sourceRect.h)) {
@@ -72,7 +97,7 @@ bool BitmapHandler::LoadFragment(const std::string& filepath, const SDL_Rect& so
 }
 
 bool BitmapHandler::SaveFragment(const std::string&filepath, const SDL_Rect& area) const{
-    if (!surface) {
+    if (!Contains(surface, area)) {
         return false;
     }
     BitmapHandler cropped(area.w, area.h);

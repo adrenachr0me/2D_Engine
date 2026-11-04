@@ -28,8 +28,8 @@ public:
     bool SaveFragment(const std::string& filepath, const SDL_Rect& area) const;
     bool copy_bitmap(const BitmapHandler& source, const SDL_Rect* srcRect = nullptr, const SDL_Rect* dstRect = nullptr);
     SDL_Surface* GetRawSurface() const {return surface;};
-    int GetHeight() const {return surface ? surface->w : 0;}
-    int GetWidth() const {return surface ? surface->h : 0;}
+    int GetHeight() const {return surface ? surface->h : 0;}
+    int GetWidth() const {return surface ? surface->w : 0;}
     bool isValid() const {return surface != nullptr;}
 };
 
