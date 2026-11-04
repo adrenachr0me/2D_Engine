@@ -1,71 +1,111 @@
 #include "../../include/game/player.h"
+#include <iostream>
 
-Player::Player(float startX, float startY,const Input& inputModule) : position(startX, startY), input(inputModule) {
-    float halfSize = 15.0f;
-    Point2D nose(0.0f, -30.0f);
-    Point2D leftWing(-20.0f, 20.0f);
-    Point2D rightWing(20.0f, 20.0f);
-    Point2D centerBack(0.0f, 10.0f);
+Player::Player(float startX, float startY, const Input& inputModule)
+    : SpriteObject(startX, startY), input(inputModule)
+{
+    Scale(4.0f, 4.0f);
+    std::string basePath = "assets/player/";
 
-    model.emplace_back(nose, leftWing);
-    model.emplace_back(leftWing, centerBack);
-    model.emplace_back(centerBack, rightWing);
-    model.emplace_back(rightWing, nose);
+    for(int i = 0; i < 9; i++)
+    {
+        downFrames.push_back(new BitmapHandler(basePath + "down" + std::to_string(i) + ".bmp"));
+        upFrames.push_back(new BitmapHandler(basePath + "up" + std::to_string(i) + ".bmp"));
+        leftFrames.push_back(new BitmapHandler(basePath + "left" + std::to_string(i) + ".bmp"));
+        rightFrames.push_back(new BitmapHandler(basePath + "right" + std::to_string(i) + ".bmp"));
+    }
+
+    std::vector<const BitmapHandler*> downVec, upVec, leftVec, rightVec;
+    for(int i = 0; i < 9; i++)
+    {
+        downVec.push_back(downFrames[i]);
+        upVec.push_back(upFrames[i]);
+        leftVec.push_back(leftFrames[i]);
+        rightVec.push_back(rightFrames[i]);
+    }
+
+    downAnimation  = AddAnimation(downVec);
+    upAnimation    = AddAnimation(upVec);
+    leftAnimation  = AddAnimation(leftVec);
+    rightAnimation = AddAnimation(rightVec);
+
+    // USTAWIANIE STARTOWE:
+    SetAnimation(downAnimation);
+    activeAnimID = downAnimation; // Zapamiętujemy, że na start odpalamy ruch w dół
+    Play();
 }
+
+Player::~Player() {
+    for(int i = 0; i < 9; i++) {
+        delete downFrames[i];
+        delete upFrames[i];
+        delete leftFrames[i];
+        delete rightFrames[i];
+    }
+}
+
 void Player::Update(float deltaTime) {
     float dx = 0.0f;
     float dy = 0.0f;
-    if (input.IsKeyDown(SDL_SCANCODE_W) || input.IsKeyDown(SDL_SCANCODE_UP))    dy -= speed * deltaTime;
-    if (input.IsKeyDown(SDL_SCANCODE_S) || input.IsKeyDown(SDL_SCANCODE_DOWN))  dy += speed * deltaTime;
-    if (input.IsKeyDown(SDL_SCANCODE_A) || input.IsKeyDown(SDL_SCANCODE_LEFT))  dx -= speed * deltaTime;
-    if (input.IsKeyDown(SDL_SCANCODE_D) || input.IsKeyDown(SDL_SCANCODE_RIGHT)) dx += speed * deltaTime;
+
+    bool isMovingUp    = input.IsKeyDown(SDL_SCANCODE_W) || input.IsKeyDown(SDL_SCANCODE_UP);
+    bool isMovingDown  = input.IsKeyDown(SDL_SCANCODE_S) || input.IsKeyDown(SDL_SCANCODE_DOWN);
+    bool isMovingLeft  = input.IsKeyDown(SDL_SCANCODE_A) || input.IsKeyDown(SDL_SCANCODE_LEFT);
+    bool isMovingRight = input.IsKeyDown(SDL_SCANCODE_D) || input.IsKeyDown(SDL_SCANCODE_RIGHT);
+
+    // Domyślnie planujemy zostać przy obecnej animacji
+    std::size_t nextAnimation = activeAnimID;
+
+    if (isMovingUp) {
+        dy -= speed * deltaTime;
+        nextAnimation = upAnimation;
+    }
+    else if (isMovingDown) {
+        dy += speed * deltaTime;
+        nextAnimation = downAnimation;
+    }
+
+    if (isMovingLeft) {
+        dx -= speed * deltaTime;
+        nextAnimation = leftAnimation;
+    }
+    else if (isMovingRight) {
+        dx += speed * deltaTime;
+        nextAnimation = rightAnimation;
+    }
+
+    // Jeśli gracz się porusza
     if (dx != 0.0f || dy != 0.0f)
     {
+        // Zmieniamy animację TYLKO wtedy, gdy zmienił się kierunek na klawiaturze
+        if (nextAnimation != activeAnimID) {
+            SetAnimation(nextAnimation);
+            activeAnimID = nextAnimation; // Zapisujemy nową aktywną animację
+        }
+
         Translate(dx, dy);
+        Animate(deltaTime);
     }
+    else
+    {
+        // EFEKT STOP: Gracz puścił klawisze, wymuszamy pozycję bazową "w dół"
+        if (activeAnimID != downAnimation) {
+            SetAnimation(downAnimation);
+            activeAnimID = downAnimation;
+        }
+    }
+
+    // Rotacja i skalowanie
     float rotSpeed = 3.0f;
     if (input.IsKeyDown(SDL_SCANCODE_Q)) Rotate(-rotSpeed * deltaTime);
     if (input.IsKeyDown(SDL_SCANCODE_E)) Rotate(rotSpeed * deltaTime);
+
     float scaleSpeed = 1.0f;
     if (input.IsKeyDown(SDL_SCANCODE_R)) Scale(1.0f + scaleSpeed * deltaTime, 1.0f + scaleSpeed * deltaTime);
-    if (input.IsKeyDown(SDL_SCANCODE_F)) Scale (1.0f - scaleSpeed * deltaTime, 1.0f - scaleSpeed * deltaTime);
-}
-void Player::Draw(PrimitiveRenderer& renderer) {
-    for (const auto& segment : model) {
-        LineSegment worldSegment = segment;
-
-        worldSegment.Scale(scaleFactor, scaleFactor);
-        worldSegment.Rotate(rotationAngle);
-
-        worldSegment.Translate(position.GetX(), position.GetY());
-        worldSegment.Draw(renderer);
-    }
-
-}
-void Player::Translate(float tx, float ty)
-{
-    position.Translate(tx, ty);
+    if (input.IsKeyDown(SDL_SCANCODE_F)) Scale(1.0f - scaleSpeed * deltaTime, 1.0f - scaleSpeed * deltaTime);
 }
 
-void Player::Rotate(float alpha)
-{
-    rotationAngle += alpha;
-}
 
-void Player::Rotate(float alpha, const Point2D& center)
-{
-    position.Rotate(alpha, center);
-    rotationAngle += alpha;
-}
 
-void Player::Scale(float kx, float ky)
-{
-    scaleFactor *= kx;
-}
 
-void Player::Scale(float kx, float ky, const Point2D& center)
-{
-    position.Scale(kx, ky, center);
-    scaleFactor *= kx;
-}
 

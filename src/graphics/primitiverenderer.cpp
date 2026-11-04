@@ -275,22 +275,25 @@ void PrimitiveRenderer::DrawPoint(
 }
 void PrimitiveRenderer::DrawCircle(float x0, float y0, int r, SDL_Color color)
 {
-    SDL_SetRenderDrawColor(
-        renderer,
-        color.r,
-        color.g,
-        color.b,
-        color.a);
+    if (r <= 0) return;
+
+    // Ustawiamy kolor tylko raz dla całej figury
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     const float PI = 3.1415926535f;
 
-    for (float alpha = 0.0; alpha <= PI / 2.0; alpha += 0.01)
+    // Dynamiczny krok zależny od promienia, aby uniknąć dziur w obrysie
+    float step = 1.0f / static_cast<float>(r);
+
+    for (float alpha = 0.0f; alpha <= PI / 2.0f; alpha += step)
     {
         float dx = std::round(r * std::cos(alpha));
         float dy = std::round(r * std::sin(alpha));
-        DrawPoint(x0 + dx,y0 + dy,color);
-        DrawPoint(x0 - dx,y0 + dy,color);
-        DrawPoint(x0-dx,y0 - dy,color);
-        DrawPoint(x0+dx,y0-dy,color);
+
+        // Rysujemy punkty w 4 ćwiartkach (bez ponownego ustawiania koloru)
+        SDL_RenderPoint(renderer, x0 + dx, y0 + dy);
+        SDL_RenderPoint(renderer, x0 - dx, y0 + dy);
+        SDL_RenderPoint(renderer, x0 - dx, y0 - dy);
+        SDL_RenderPoint(renderer, x0 + dx, y0 - dy);
     }
 }
 void PrimitiveRenderer::DrawFilledCircle(float x0, float y0, int r, SDL_Color color)
@@ -308,22 +311,28 @@ void PrimitiveRenderer::DrawFilledCircle(float x0, float y0, int r, SDL_Color co
         DrawLineSDL(x0 - dx, y0 - dy, x0 + dx, y0 - dy, color);
     }
 }
-void PrimitiveRenderer::DrawElipse(float x0, float y0, int  r_x, int r_y, SDL_Color color) {
-    SDL_SetRenderDrawColor(
-        renderer,
-        color.r,
-        color.g,
-        color.b,
-        color.a);
+void PrimitiveRenderer::DrawElipse(float x0, float y0, int r_x, int r_y, SDL_Color color)
+{
+    if (r_x <= 0 || r_y <= 0) return;
+
+    // Ustawiamy kolor tylko raz dla całej figury
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     const float PI = 3.1415926535f;
 
-    for (float alpha = 0.0; alpha <= PI / 2.0; alpha += 0.01) {
+    // Dobieramy krok na podstawie większego promienia, aby zachować gładkość
+    int max_r = std::max(r_x, r_y);
+    float step = 1.0f / static_cast<float>(max_r);
+
+    for (float alpha = 0.0f; alpha <= PI / 2.0f; alpha += step)
+    {
         float dx = std::round(r_x * std::cos(alpha));
         float dy = std::round(r_y * std::sin(alpha));
-        DrawPoint(x0 + dx,y0 + dy,color);
-        DrawPoint(x0 - dx,y0 + dy,color);
-        DrawPoint(x0-dx,y0 - dy,color);
-        DrawPoint(x0+dx,y0-dy,color);
+
+        // Rysujemy punkty w 4 ćwiartkach (w pełni dokończona logika)
+        SDL_RenderPoint(renderer, x0 + dx, y0 + dy);
+        SDL_RenderPoint(renderer, x0 - dx, y0 + dy);
+        SDL_RenderPoint(renderer, x0 - dx, y0 - dy);
+        SDL_RenderPoint(renderer, x0 + dx, y0 - dy);
     }
 }
 void PrimitiveRenderer::DrawFilledEllipse(float x0, float y0, int r_x, int r_y, SDL_Color color)

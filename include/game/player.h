@@ -1,4 +1,3 @@
-
 #ifndef ENGINE2D_PLAYER_H
 #define ENGINE2D_PLAYER_H
 #pragma once
@@ -8,23 +7,31 @@
 #include <vector>
 #include "core/timer.h"
 #include "system/input.h"
-class Player: public UpdatableObject, public TransformableObject, public DrawableObject {
+
+// Upewnij się, że ten nagłówek jest dołączony, by klasa znała BitmapHandler
+#include "graphics/bitmap_handler.h" 
+
+class Player: public SpriteObject, public UpdatableObject{
 private:
-    Point2D position;
-    float rotationAngle{0.0f};
-    float scaleFactor{1.0f};
-    float speed{200.0f};
-    std::vector<LineSegment> model;
+
+    float speed{300.0f};
     const Input& input;
+    std::size_t activeAnimID{0};
+
 
 public:
     Player(float startX, float startY, const Input& inputModule);
+    ~Player();
     void Update(float deltaTime) override;
-    void Draw(PrimitiveRenderer& renderer) override;
-    void Translate(float tx, float ty) override;
-    void Rotate(float alpha) override;
-    void Rotate(float alpha, const Point2D& center) override;
-    void Scale(float kx, float ky) override;
-    void Scale(float kx, float ky, const Point2D& center) override;
+
+    std::vector<BitmapHandler*> downFrames;
+    std::vector<BitmapHandler*> upFrames;
+    std::vector<BitmapHandler*> leftFrames;
+    std::vector<BitmapHandler*> rightFrames;
+
+    std::size_t downAnimation;
+    std::size_t upAnimation;
+    std::size_t leftAnimation;
+    std::size_t rightAnimation;
 };
 #endif //ENGINE2D_PLAYER_H

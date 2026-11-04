@@ -54,3 +54,99 @@ void BitmapObject::Draw(PrimitiveRenderer& renderer) {
         }
     }
 }
+
+SpriteObject::SpriteObject()
+    : BitmapObject()
+{
+}
+
+SpriteObject::SpriteObject(float x, float y)
+    : BitmapObject(x, y)
+{
+}
+
+std::size_t SpriteObject::AddAnimation(
+    const std::vector<const BitmapHandler*>& frames)
+{
+    animations.push_back(frames);
+    return animations.size() - 1;
+}
+
+void SpriteObject::SetAnimation(std::size_t index)
+{
+    if(index >= animations.size())
+        return;
+
+    currentAnimation = index;
+    currentFrame = 0;
+    timeAccumulator = 0.0f;
+}
+
+void SpriteObject::SetFrameDuration(float seconds)
+{
+    frameDuration = seconds;
+}
+
+void SpriteObject::Play()
+{
+    playing = true;
+}
+
+void SpriteObject::Stop()
+{
+    playing = false;
+    currentFrame = 0;
+}
+
+void SpriteObject::Animate(float deltaTime)
+{
+    if(!playing)
+        return;
+
+    if(animations.empty())
+        return;
+
+    auto& animation = animations[currentAnimation];
+
+    if(animation.empty())
+        return;
+
+    timeAccumulator += deltaTime;
+
+    if(timeAccumulator >= frameDuration)
+    {
+        timeAccumulator = 0.0f;
+
+        currentFrame++;
+
+        if(currentFrame >= animation.size())
+            currentFrame = 0;
+    }
+}
+
+void SpriteObject::Draw(PrimitiveRenderer& renderer)
+{
+    if(animations.empty())
+        return;
+
+    auto& animation = animations[currentAnimation];
+
+    if(animation.empty())
+        return;
+
+    const BitmapHandler* bitmap = animation[currentFrame];
+
+    if(!bitmap)
+        return;
+
+    float angleDeg =
+        rotationAngle * (180.0f / 3.1415926535f);
+
+    renderer.DrawBitmap(
+        *bitmap,
+        position->GetX(),
+        position->GetY(),
+        scaleFactor,
+        angleDeg
+    );
+}

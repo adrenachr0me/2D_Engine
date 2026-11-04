@@ -41,9 +41,28 @@ void BitmapHandler::delete_bitmap() {
     }
 }
 
-bool BitmapHandler::load_from_file(const std::string& filepath) {
+bool BitmapHandler::load_from_file(const std::string& filepath)
+{
     delete_bitmap();
+
     surface = SDL_LoadBMP(filepath.c_str());
+
+    if(!surface)
+    {
+        std::cout << "Nie mozna wczytac: "
+                  << filepath
+                  << std::endl;
+    } else {
+        // 1. W SDL3 szczegóły formatu wyciąga się przez SDL_GetPixelFormatDetails
+        const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(surface->format);
+
+        // 2. Mapujemy kolor biały (RGB: 255, 255, 255)
+        Uint32 colorkey = SDL_MapRGB(details, nullptr, 255, 255, 255);
+
+        // 3. W SDL3 używamy funkcji SDL_SetSurfaceColorKey oraz zwykłego 'true' zamiast SDL_TRUE
+        SDL_SetSurfaceColorKey(surface, true, colorkey);
+    }
+
     return surface != nullptr;
 }
 
