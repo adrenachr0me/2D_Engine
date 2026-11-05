@@ -57,6 +57,11 @@ add_executable(${PROJECT_NAME}
         include/graphics/bitmap_handler.h
         src/graphics/bitmap_handler.cpp
         src/core/object_hierarchy.cpp
+        include/world/tilemap.h
+        src/world/tilemap.cpp
+        include/physics/collider.h
+        src/physics/collider.cpp
+        include/graphics/camera.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)

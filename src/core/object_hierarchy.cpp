@@ -9,6 +9,48 @@ BitmapObject::~BitmapObject(){
     delete position;
     position = nullptr;
 }
+BitmapObject::BitmapObject(BitmapObject&& other) noexcept
+    : position(other.position),
+      rotationAngle(other.rotationAngle),
+      scaleFactor(other.scaleFactor),
+      scaleFactorY(other.scaleFactorY),
+      bitmaps(std::move(other.bitmaps))
+{
+    other.position = nullptr;
+    other.rotationAngle = 0.0f;
+    other.scaleFactor = 1.0f;
+    other.scaleFactorY = 1.0f;
+}
+
+BitmapObject& BitmapObject::operator=(BitmapObject&& other) noexcept
+{
+    if (this != &other)
+    {
+        delete position;
+
+        position = other.position;
+        rotationAngle = other.rotationAngle;
+        scaleFactor = other.scaleFactor;
+        scaleFactorY = other.scaleFactorY;
+        bitmaps = std::move(other.bitmaps);
+
+        other.position = nullptr;
+        other.rotationAngle = 0.0f;
+        other.scaleFactor = 1.0f;
+        other.scaleFactorY = 1.0f;
+    }
+    return *this;
+}
+
+float BitmapObject::GetX() const
+{
+    return position ? position->GetX() : 0.0f;
+}
+
+float BitmapObject::GetY() const
+{
+    return position ? position->GetY() : 0.0f;
+}
 
 void BitmapObject::AddBitmap(const BitmapHandler* bitmap) {
     if (bitmap) {
@@ -94,5 +136,19 @@ void SpriteObject::Draw(PrimitiveRenderer& renderer) {
     if (bitmap) {
         const float angleDeg = rotationAngle * (180.0f / 3.1415926535f);
         renderer.DrawBitmap(*bitmap, position->GetX(), position->GetY(), scaleFactor, scaleFactorY, angleDeg);
+    }
+}
+
+void SpriteObject::Draw(PrimitiveRenderer& renderer, const Camera& camera) {
+    if (frameCount == 0 || !position)
+        return;
+
+    const auto* bitmap = bitmaps[firstFrame + currentFrame];
+    if (bitmap) {
+        const float angleDeg = rotationAngle * (180.0f / 3.1415926535f);
+        float screenX = camera.WorldToScreenX(position->GetX());
+        float screenY = camera.WorldToScreenY(position->GetY());
+
+        renderer.DrawBitmap(*bitmap, screenX, screenY, scaleFactor, scaleFactorY, angleDeg);
     }
 }

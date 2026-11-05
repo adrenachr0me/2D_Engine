@@ -6,6 +6,7 @@
 #include <SDL3/SDL.h>
 #include <string>
 
+
 class BitmapHandler {
 private:
     SDL_Surface* surface{nullptr};
@@ -15,6 +16,7 @@ public:
     explicit BitmapHandler(const std::string& filepath);
 
     ~BitmapHandler();
+
 
     BitmapHandler(const BitmapHandler&) = delete;
     BitmapHandler& operator=(const BitmapHandler&) = delete;

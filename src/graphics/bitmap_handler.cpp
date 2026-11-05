@@ -5,7 +5,8 @@ namespace {
 bool Contains(SDL_Surface* surface, const SDL_Rect& area) {
     return surface && area.x >= 0 && area.y >= 0 && area.w > 0 && area.h > 0 &&
            area.w <= surface->w && area.h <= surface->h &&
-           area.x <= surface->w - area.w && area.y <= surface->h - area.h;
+           area.x <= (surface->w - area.w) &&
+           area.y <= (surface->h - area.h);
 }
 }
 

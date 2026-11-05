@@ -9,6 +9,7 @@ Engine::Engine()
     primitiveRenderer = nullptr;
     player = nullptr;
     running = false;
+
 }
 
 Engine::~Engine()
@@ -61,12 +62,36 @@ bool Engine::Initialize(
         return false;
     }
     primitiveRenderer = new PrimitiveRenderer(renderer);
-    player = new Player(width / 2.0f, height / 2.0f, input);
-    if (!player->HasSprites()) {
-        ErrorHandle::SDLError("Failed to load assets/player.bmp");
-        Shutdown();
-        return false;
+    player = new Player(tilemap.GetWorldWidth() / 2.0f, tilemap.GetWorldHeight() / 2.0f, input);
+    camera = Camera(width,height);
+    if (!mapTileset.load_from_file("assets/tileset.bmp"))
+    {
+        Log::Error("Failed to load tileset.bmp");
     }
+    int mapW = 80;
+    int mapH = 50;
+    int tSize = 32;
+
+    std::vector<int> testMap(mapW * mapH, 0);
+
+    for (int x = 0; x < mapW; ++x)
+    {
+        testMap[0 * mapW + x] = 1;
+        testMap[(mapH - 1) * mapW + x] = 1;
+    }
+    for (int y = 0; y < mapH; ++y)
+    {
+        testMap[y * mapW + 0] = 1;
+        testMap[y * mapW + (mapW - 1)] = 1;
+    }
+
+    tilemap = Tilemap(mapW, mapH, tSize, &mapTileset);
+    tilemap.SetTiles(testMap, mapW, mapH);
+    //if (!player->HasSprites()) {
+     //   ErrorHandle::SDLError("Failed to load assets/player.bmp");
+       // Shutdown();
+        //return false;
+    //}
     running = true;
     Log::Info("Engine initialized successfully");
     return true;
@@ -90,7 +115,10 @@ void Engine::Update(float dt)
 {
     if (player) {
         player->Update(dt);
+        camera.Follow(player->GetX(),player->GetY());
     }
+
+    camera.ClampToBounds(static_cast<float>(tilemap.GetWorldWidth()), static_cast<float>(tilemap.GetWorldHeight()));
 }
 
 void Engine::Render()
@@ -132,10 +160,16 @@ void Engine::Render()
     primitiveRenderer->DrawPolilane(points, true, red);
     primitiveRenderer->DrawCircle(400,600, 200, red);
     primitiveRenderer->DrawElipse(1000,300, 200, 400, red);
+    float screenDotX = camera.WorldToScreenX(400.0f);
+    float screenDotY = camera.WorldToScreenY(300.0f);
+    primitiveRenderer->DrawCircle(screenDotX, screenDotY, 15, red);
+    tilemap.Draw(*primitiveRenderer, camera);
     if (player)
     {
-        player->Draw(*primitiveRenderer);
+        player->Draw(*primitiveRenderer, camera);
     }
+
+
 
     SDL_RenderPresent(renderer);
 }

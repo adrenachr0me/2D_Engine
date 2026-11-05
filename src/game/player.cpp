@@ -1,5 +1,7 @@
 #include "../../include/game/player.h"
 
+#include "primitiverenderer.h"
+
 Player::Player(float startX, float startY,const Input& inputModule) : SpriteObject(startX, startY), sprites(16), input(inputModule) {
     const char* basePath = SDL_GetBasePath();
     const std::string filepath = std::string(basePath ? basePath : "") + "assets/player.bmp";
@@ -44,3 +46,7 @@ void Player::Update(float deltaTime) {
 void Player::Draw(PrimitiveRenderer& renderer) {
     SpriteObject::Draw(renderer);
 }
+void Player::Draw(PrimitiveRenderer& renderer, const Camera& camera) {
+    SpriteObject::Draw(renderer, camera);
+}
+

@@ -9,6 +9,8 @@
 #include "../graphics/point2D.h"
 #include "logs.h"
 #include "game/player.h"
+#include "graphics/camera.h"
+#include "world/tilemap.h"
 class Engine
 {
 private:
@@ -28,6 +30,9 @@ private:
     Input input;
     Timer timer;
     Player* player;
+    BitmapHandler mapTileset;
+    Tilemap tilemap;
+    Camera camera;
 
 public:
 

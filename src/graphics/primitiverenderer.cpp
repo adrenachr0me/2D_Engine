@@ -10,6 +10,32 @@ PrimitiveRenderer::PrimitiveRenderer(SDL_Renderer* r)
 {
     renderer = r;
 }
+PrimitiveRenderer::~PrimitiveRenderer() {
+    for (auto& [surface, texture] : textureCache) {
+        if (texture) {
+            SDL_DestroyTexture(texture);
+        }
+    }
+    textureCache.clear();
+}
+SDL_Texture* PrimitiveRenderer::GetOrCreateTexture(SDL_Surface* surface) {
+    if (!renderer || !surface) {
+        return nullptr;
+    }
+
+    auto it = textureCache.find(surface);
+    if (it != textureCache.end()) {
+        return it->second;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture) {
+        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+        SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+        textureCache[surface] = texture;
+    }
+    return texture;
+}
 SDL_Color PrimitiveRenderer::GetPixelColor(SDL_Surface* surface, int x, int y)
 {
     if (!surface || x < 0 || x >= surface->w || y < 0 || y >= surface->h)
@@ -417,12 +443,10 @@ void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y
     if (!renderer || !bitmap.isValid())
         return;
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, bitmap.GetRawSurface());
+    SDL_Texture* texture = GetOrCreateTexture(bitmap.GetRawSurface());
     if (!texture)
         return;
 
-    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
     float w = bitmap.GetWidth() * std::abs(scaleX);
     float h = bitmap.GetHeight() * std::abs(scaleY);
 
@@ -437,7 +461,6 @@ void PrimitiveRenderer::DrawBitmap(const BitmapHandler& bitmap, float x, float y
                                                (scaleY < 0 ? SDL_FLIP_VERTICAL : 0));
     SDL_RenderTextureRotated(renderer, texture, nullptr, &dstRect, angleDeg, nullptr, flip);
 
-    SDL_DestroyTexture(texture);
 }
 
 void PrimitiveRenderer::DrawBitmapFragment(const BitmapHandler& bitmap, const SDL_Rect& srcRect, float x, float y, float scale, float angleDeg)
@@ -445,9 +468,21 @@ void PrimitiveRenderer::DrawBitmapFragment(const BitmapHandler& bitmap, const SD
     if (!renderer || !bitmap.isValid())
         return;
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, bitmap.GetRawSurface());
-    if (!texture)
-        return;
+    SDL_Surface* surf = bitmap.GetRawSurface();
+
+    auto it = textureCache.find(surf);
+    SDL_Texture* texture = nullptr;
+
+    if (it != textureCache.end()) {
+        texture = it->second;
+    } else {
+        texture = SDL_CreateTextureFromSurface(renderer, surf);
+        if (!texture) return;
+
+        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+        SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+        textureCache[surf] = texture;
+    }
 
     SDL_FRect fSrcRect = {
         static_cast<float>(srcRect.x),
@@ -459,14 +494,7 @@ void PrimitiveRenderer::DrawBitmapFragment(const BitmapHandler& bitmap, const SD
     float w = fSrcRect.w * scale;
     float h = fSrcRect.h * scale;
 
-    SDL_FRect dstRect = {
-        x - w / 2.0f,
-        y - h / 2.0f,
-        w,
-        h
-    };
+    SDL_FRect dstRect = { x, y, w, h };
 
     SDL_RenderTextureRotated(renderer, texture, &fSrcRect, &dstRect, angleDeg, nullptr, SDL_FLIP_NONE);
-
-    SDL_DestroyTexture(texture);
 }

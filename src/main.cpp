@@ -9,8 +9,8 @@ int main(int argc, char *argv[])
 
     if (engine.Initialize(
         "2D Engine",
-        1280,
-        720,
+        1920,
+        1080,
         false,
         60))
     {

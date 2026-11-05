@@ -7,16 +7,20 @@
 #include <vector>
 #include "point2D.h"
 #include "linesegment.h"
+#include <unordered_map>
 #pragma once
 
 class PrimitiveRenderer
 {
 private:
     SDL_Renderer* renderer;
+    std::unordered_map<SDL_Surface*, SDL_Texture*> textureCache;
+    SDL_Texture* GetOrCreateTexture(SDL_Surface* surface);
     SDL_Color GetPixelColor(SDL_Surface* surface, int x, int y);
     void SetPixelColor(SDL_Surface* surface, int x, int y, SDL_Color color);
 public:
     PrimitiveRenderer(SDL_Renderer* r);
+    ~PrimitiveRenderer();
     SDL_Renderer* GetRawRenderer() const { return renderer; }
     bool ColorsMatch(const SDL_Color& c1, const SDL_Color& c2);
     void DrawLineSDL(

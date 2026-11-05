@@ -19,6 +19,9 @@ public:
     Player(float startX, float startY, const Input& inputModule);
     void Update(float deltaTime) override;
     void Draw(PrimitiveRenderer& renderer) override;
+
+    void Draw(PrimitiveRenderer &renderer, const Camera &camera) override;
+
     bool HasSprites() const { return spritesLoaded; }
 };
 #endif //ENGINE2D_PLAYER_H
