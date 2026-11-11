@@ -28,5 +28,16 @@ public:
     int GetWorldHeight() const { return mapHeight * tileSize; }
     void Draw(PrimitiveRenderer& renderer) override;
     void Draw(PrimitiveRenderer& renderer, const Camera& camera);
+    bool IsTileSolid(int tileID) const {
+        return tileID == 1090 || tileID == 1;
+    }
+
+    bool IsSolidAtTile(int tx, int ty) const {
+        if (tx < 0 || tx >= mapWidth || ty < 0 || ty >= mapHeight) {
+            return true;
+        }
+        int id = tiles[ty * mapWidth + tx];
+        return IsTileSolid(id);
+    }
 };
 #endif //ENGINE2D_TILEMAP_H

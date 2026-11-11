@@ -68,25 +68,60 @@ bool Engine::Initialize(
     {
         Log::Error("Failed to load tileset.bmp");
     }
-    int mapW = 80;
-    int mapH = 50;
-    int tSize = 32;
+    // 1. Задаем размер карты в 2 экрана
+    const int mapW = 80;
+    const int mapH = 45;
+    const int tSize = 32;
 
-    std::vector<int> testMap(mapW * mapH, 0);
+    const int TILE_GRASS = 0;
+    const int TILE_WALL  = 1090;
 
-    for (int x = 0; x < mapW; ++x)
-    {
-        testMap[0 * mapW + x] = 1;
-        testMap[(mapH - 1) * mapW + x] = 1;
+    // Заполняем всё поле травой
+    std::vector<int> testMap(mapW * mapH, TILE_GRASS);
+
+    // 2. Внешние границы мира (периметр)
+    for (int x = 0; x < mapW; ++x) {
+        testMap[0 * mapW + x] = TILE_WALL;              // Верхний край
+        testMap[(mapH - 1) * mapW + x] = TILE_WALL;     // Нижний край
     }
-    for (int y = 0; y < mapH; ++y)
-    {
-        testMap[y * mapW + 0] = 1;
-        testMap[y * mapW + (mapW - 1)] = 1;
+    for (int y = 0; y < mapH; ++y) {
+        testMap[y * mapW + 0] = TILE_WALL;              // Левый край
+        testMap[y * mapW + (mapW - 1)] = TILE_WALL;     // Правый край
     }
 
+    // 3. Строим внутреннюю комнату 1 (слева, 15x15 тайлов с дверным проемом)
+    for (int x = 10; x <= 25; ++x) {
+        testMap[10 * mapW + x] = TILE_WALL;
+        testMap[25 * mapW + x] = TILE_WALL;
+    }
+    for (int y = 10; y <= 25; ++y) {
+        testMap[y * mapW + 10] = TILE_WALL;
+        if (y < 16 || y > 19) { // Оставляем проем (дверь) шириной 4 тайла
+            testMap[y * mapW + 25] = TILE_WALL;
+        }
+    }
+
+    // 4. Строим коридор/стену по центру карты
+    for (int y = 5; y < 40; ++y) {
+        if (y < 20 || y > 24) { // Проход по центру
+            testMap[y * mapW + 40] = TILE_WALL;
+        }
+    }
+
+    // 5. Расставляем каменные колонны 2x2 в правой части карты
+    for (int cy = 10; cy <= 30; cy += 10) {
+        for (int cx = 50; cx <= 70; cx += 10) {
+            testMap[cy * mapW + cx] = TILE_WALL;
+            testMap[cy * mapW + (cx + 1)] = TILE_WALL;
+            testMap[(cy + 1) * mapW + cx] = TILE_WALL;
+            testMap[(cy + 1) * mapW + (cx + 1)] = TILE_WALL;
+        }
+    }
+
+    // 6. Передаем готовую карту в Tilemap
     tilemap = Tilemap(mapW, mapH, tSize, &mapTileset);
     tilemap.SetTiles(testMap, mapW, mapH);
+    player->SetPosition(420,600);
     //if (!player->HasSprites()) {
      //   ErrorHandle::SDLError("Failed to load assets/player.bmp");
        // Shutdown();
@@ -114,7 +149,7 @@ void Engine::ProcessEvents()
 void Engine::Update(float dt)
 {
     if (player) {
-        player->Update(dt);
+        player->Update(dt,tilemap);
         camera.Follow(player->GetX(),player->GetY());
     }
 
@@ -129,37 +164,7 @@ void Engine::Render()
 
     SDL_Color green ={0,255,0,255};
 
-    Point2D point(
-        150.0f,
-        250.0f);
-    point.SetColor(green);
-    point.Draw(
-        *primitiveRenderer);
 
-    LineSegment line1(
-    Point2D(400,300),
-    Point2D(400,0));
-
-    line1.Draw(
-        *primitiveRenderer,
-        false,
-        red);
-
-    LineSegment line2(
-    Point2D(100,200),
-    Point2D(500,200));
-
-    line2.Draw(
-        *primitiveRenderer,
-        true,
-        green);
-    std::vector<Point2D>points;
-    points.emplace_back(100.0f, 150.0f);
-    points.emplace_back(200.0f, 250.0f);
-    points.emplace_back(150.0f, 300.0f);
-    primitiveRenderer->DrawPolilane(points, true, red);
-    primitiveRenderer->DrawCircle(400,600, 200, red);
-    primitiveRenderer->DrawElipse(1000,300, 200, 400, red);
     float screenDotX = camera.WorldToScreenX(400.0f);
     float screenDotY = camera.WorldToScreenY(300.0f);
     primitiveRenderer->DrawCircle(screenDotX, screenDotY, 15, red);
