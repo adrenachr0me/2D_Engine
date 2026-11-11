@@ -2,6 +2,10 @@
 #include "graphics/bitmap_handler.h"
 #include "graphics/primitiverenderer.h"
 #include "graphics/camera.h"
+#include <cmath>
+#include <fstream>
+#include <limits>
+#include <utility>
 
 Tilemap::Tilemap(int width, int height, int tileSize, const BitmapHandler* tilesetBitmap)
     : mapWidth(width), mapHeight(height), tileSize(tileSize), tileset(tilesetBitmap)
@@ -14,20 +18,61 @@ void Tilemap::SetTiles(const std::vector<int>& new_tiles, int width, int height)
     tiles = new_tiles;
 }
 
-bool Tilemap::isSolid(int tileX, int tileY) const{
-    if (tileX < 0 || tileX >= mapWidth || tileY < 0 || tileY >= mapHeight)
-    {
-        return true;
+bool Tilemap::LoadFromFile(const std::string& path, const BitmapHandler* tilesetBitmap) {
+    if (!tilesetBitmap || !tilesetBitmap->isValid())
+        return false;
+
+    std::ifstream file(path);
+    int width, height, size, solidStart;
+    if (!(file >> width >> height >> size >> solidStart))
+        return false;
+    if (width <= 0 || height <= 0 || width > 4096 || height > 4096 ||
+        static_cast<long long>(width) * height > 4194304 || size <= 0 ||
+        size > tilesetBitmap->GetWidth() || size > tilesetBitmap->GetHeight() ||
+        tilesetBitmap->GetWidth() % size != 0 || tilesetBitmap->GetHeight() % size != 0 ||
+        width > std::numeric_limits<int>::max() / size ||
+        height > std::numeric_limits<int>::max() / size)
+        return false;
+
+    const long long atlasTileCount = static_cast<long long>(tilesetBitmap->GetWidth() / size) *
+                                    (tilesetBitmap->GetHeight() / size);
+    if (atlasTileCount > std::numeric_limits<int>::max() ||
+        solidStart < 0 || solidStart > atlasTileCount)
+        return false;
+
+    std::vector<int> loadedTiles(width * height);
+    for (int& id : loadedTiles) {
+        if (!(file >> id) || id < 0 || id >= atlasTileCount)
+            return false;
     }
-    int tileID = tiles[tileY * mapWidth + tileX];
-    return tileID == 1;
+    file >> std::ws;
+    if (!file.eof())
+        return false;
+
+    mapWidth = width;
+    mapHeight = height;
+    tileSize = size;
+    firstSolidTile = solidStart;
+    tileset = tilesetBitmap;
+    tiles = std::move(loadedTiles);
+    return true;
+}
+
+bool Tilemap::isSolid(int tileX, int tileY) const{
+    return IsSolidAtTile(tileX, tileY);
 }
 
 bool Tilemap::CheckCollision(float worldX, float worldY, float width, float height) const{
-    int startCol = static_cast<int>(worldX) / tileSize;
-    int endCol   = static_cast<int>(worldX + width) / tileSize;
-    int startRow = static_cast<int>(worldY) / tileSize;
-    int endRow   = static_cast<int>(worldY + height) / tileSize;
+    if (!std::isfinite(worldX) || !std::isfinite(worldY) ||
+        !std::isfinite(width) || !std::isfinite(height) ||
+        width <= 0.0f || height <= 0.0f || tileSize <= 0 ||
+        worldX < 0.0f || worldY < 0.0f ||
+        worldX + width > GetWorldWidth() || worldY + height > GetWorldHeight())
+        return true;
+    int startCol = static_cast<int>(std::floor(worldX / tileSize));
+    int endCol   = static_cast<int>(std::floor((worldX + width - 0.01f) / tileSize));
+    int startRow = static_cast<int>(std::floor(worldY / tileSize));
+    int endRow   = static_cast<int>(std::floor((worldY + height - 0.01f) / tileSize));
     for (int row = startRow; row <= endRow; ++row)
     {
         for (int col = startCol; col <= endCol; ++col)

@@ -3,6 +3,7 @@
 #define ENGINE2D_TILEMAP_H
 #pragma once
 #include "object_hierarchy.h"
+#include <string>
 #include <vector>
 class BitmapHandler;
 class PrimitiveRenderer;
@@ -14,11 +15,13 @@ private:
     int tileSize{32};
     const BitmapHandler* tileset{nullptr};
     std::vector<int> tiles;
+    int firstSolidTile{-1};
 
 public:
     Tilemap() = default;
     Tilemap(int width, int height, int tileSize, const BitmapHandler* tilesetBitmap);
     void SetTiles(const std::vector<int>& tiles,int width, int height);
+    bool LoadFromFile(const std::string& path, const BitmapHandler* tilesetBitmap);
     bool isSolid(int tileX, int tileY) const;
     bool CheckCollision(float worldX, float worldY, float width, float height) const;
     int GetTileSize() const { return tileSize; }
@@ -29,6 +32,8 @@ public:
     void Draw(PrimitiveRenderer& renderer) override;
     void Draw(PrimitiveRenderer& renderer, const Camera& camera);
     bool IsTileSolid(int tileID) const {
+        if (firstSolidTile >= 0)
+            return tileID >= firstSolidTile;
         return tileID == 1090 || tileID == 1;
     }
 

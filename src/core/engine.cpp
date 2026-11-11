@@ -32,6 +32,7 @@ bool Engine::Initialize(
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         ErrorHandle::SDLError("Failed to initialize SDL");
+        Shutdown();
         return false;
     }
 
@@ -49,6 +50,7 @@ bool Engine::Initialize(
     if (window == nullptr)
     {
         ErrorHandle::SDLError("Failed to create window");
+        Shutdown();
         return false;
     }
 
@@ -59,74 +61,44 @@ bool Engine::Initialize(
     if (renderer == nullptr)
     {
         ErrorHandle::SDLError("Failed to create renderer");
+        Shutdown();
         return false;
     }
     primitiveRenderer = new PrimitiveRenderer(renderer);
-    player = new Player(tilemap.GetWorldWidth() / 2.0f, tilemap.GetWorldHeight() / 2.0f, input);
-    camera = Camera(width,height);
-    if (!mapTileset.load_from_file("assets/tileset.bmp"))
+    const char* basePath = SDL_GetBasePath();
+    const std::string assetsPath = std::string(basePath ? basePath : "") + "assets/";
+    if (!mapTileset.load_from_file(assetsPath + "tileset.bmp"))
     {
-        Log::Error("Failed to load tileset.bmp");
+        Log::Error("Failed to load assets/tileset.bmp");
+        Shutdown();
+        return false;
     }
-    // 1. Задаем размер карты в 2 экрана
-    const int mapW = 80;
-    const int mapH = 45;
-    const int tSize = 32;
-
-    const int TILE_GRASS = 0;
-    const int TILE_WALL  = 1090;
-
-    // Заполняем всё поле травой
-    std::vector<int> testMap(mapW * mapH, TILE_GRASS);
-
-    // 2. Внешние границы мира (периметр)
-    for (int x = 0; x < mapW; ++x) {
-        testMap[0 * mapW + x] = TILE_WALL;              // Верхний край
-        testMap[(mapH - 1) * mapW + x] = TILE_WALL;     // Нижний край
-    }
-    for (int y = 0; y < mapH; ++y) {
-        testMap[y * mapW + 0] = TILE_WALL;              // Левый край
-        testMap[y * mapW + (mapW - 1)] = TILE_WALL;     // Правый край
+    if (!tilemap.LoadFromFile(assetsPath + "world.map", &mapTileset))
+    {
+        Log::Error("Failed to load assets/world.map");
+        Shutdown();
+        return false;
     }
 
-    // 3. Строим внутреннюю комнату 1 (слева, 15x15 тайлов с дверным проемом)
-    for (int x = 10; x <= 25; ++x) {
-        testMap[10 * mapW + x] = TILE_WALL;
-        testMap[25 * mapW + x] = TILE_WALL;
+    const float startX = 624.0f;
+    const float startY = 1584.0f;
+    player = new Player(startX, startY, input);
+    if (!player->HasSprites())
+    {
+        Log::Error("Failed to load assets/player.bmp");
+        Shutdown();
+        return false;
     }
-    for (int y = 10; y <= 25; ++y) {
-        testMap[y * mapW + 10] = TILE_WALL;
-        if (y < 16 || y > 19) { // Оставляем проем (дверь) шириной 4 тайла
-            testMap[y * mapW + 25] = TILE_WALL;
-        }
+    const AABB spawn = player->GetCollider();
+    if (tilemap.CheckCollision(spawn.x, spawn.y, spawn.w, spawn.h))
+    {
+        Log::Error("Player start position is blocked");
+        Shutdown();
+        return false;
     }
-
-    // 4. Строим коридор/стену по центру карты
-    for (int y = 5; y < 40; ++y) {
-        if (y < 20 || y > 24) { // Проход по центру
-            testMap[y * mapW + 40] = TILE_WALL;
-        }
-    }
-
-    // 5. Расставляем каменные колонны 2x2 в правой части карты
-    for (int cy = 10; cy <= 30; cy += 10) {
-        for (int cx = 50; cx <= 70; cx += 10) {
-            testMap[cy * mapW + cx] = TILE_WALL;
-            testMap[cy * mapW + (cx + 1)] = TILE_WALL;
-            testMap[(cy + 1) * mapW + cx] = TILE_WALL;
-            testMap[(cy + 1) * mapW + (cx + 1)] = TILE_WALL;
-        }
-    }
-
-    // 6. Передаем готовую карту в Tilemap
-    tilemap = Tilemap(mapW, mapH, tSize, &mapTileset);
-    tilemap.SetTiles(testMap, mapW, mapH);
-    player->SetPosition(420,600);
-    //if (!player->HasSprites()) {
-     //   ErrorHandle::SDLError("Failed to load assets/player.bmp");
-       // Shutdown();
-        //return false;
-    //}
+    camera = Camera(width, height);
+    camera.Follow(startX, startY);
+    camera.ClampToBounds(static_cast<float>(tilemap.GetWorldWidth()), static_cast<float>(tilemap.GetWorldHeight()));
     running = true;
     Log::Info("Engine initialized successfully");
     return true;
