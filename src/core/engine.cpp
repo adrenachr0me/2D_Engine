@@ -90,6 +90,43 @@ bool Engine::Initialize(
         return false;
     }
     const AABB spawn = player->GetCollider();
+    stars.clear();
+    starsCollected = 0;
+
+    const int tSize = tilemap.GetTileSize();
+    std::vector<std::pair<int, int>> spawnTiles = {
+        {15, 12},
+        {15, 58},
+        {105, 55}
+    };
+
+    for (auto [tx, ty] : spawnTiles) {
+        while (tilemap.IsSolidAtTile(tx, ty) && tx < tilemap.GetMapWidth() - 3) {
+            tx++;
+        }
+
+        float worldX = tx * tSize + tSize / 2.0f;
+        float worldY = ty * tSize + tSize / 2.0f;
+        stars.push_back({worldX, worldY, 12.0f, false});
+    }
+    currentState = GameState::Playing;
+
+    portal.centerX = 98.0f * tSize;
+    portal.centerY = 19.0f * tSize;
+
+    const int baseLeftX = 95;
+    const int baseTopY  = 18;
+    const int baseCols  = 6;
+    const int baseRows  = 3;
+    const float padding = 10.0f;
+
+    portal.triggerBox = AABB(
+        baseLeftX * tSize - padding,
+        baseTopY  * tSize - padding,
+        baseCols  * tSize + padding * 2.0f,
+        baseRows  * tSize + padding * 2.0f  
+    );
+    portal.active = false;
     if (tilemap.CheckCollision(spawn.x, spawn.y, spawn.w, spawn.h))
     {
         Log::Error("Player start position is blocked");
@@ -120,9 +157,25 @@ void Engine::ProcessEvents()
 
 void Engine::Update(float dt)
 {
+    if (currentState == GameState::Victory) {
+        return;
+    }
     if (player) {
         player->Update(dt,tilemap);
         camera.Follow(player->GetX(),player->GetY());
+        AABB playerBox = player->GetCollider();
+        for (auto& star : stars) {
+            if (!star.collected && playerBox.Intersects(star.GetCollider())) {
+                star.collected = true;
+                starsCollected++;
+                if (starsCollected >= 3) {
+                    portal.active = true;
+                }
+            }
+        }
+        if (portal.active && playerBox.Intersects(portal.triggerBox)) {
+            currentState = GameState::Victory;
+        }
     }
 
     camera.ClampToBounds(static_cast<float>(tilemap.GetWorldWidth()), static_cast<float>(tilemap.GetWorldHeight()));
@@ -135,12 +188,51 @@ void Engine::Render()
     SDL_Color red ={255,0,0,255};
 
     SDL_Color green ={0,255,0,255};
+    if (portal.active) {
+        float px = portal.centerX - camera.GetX();
+        float py = portal.centerY - camera.GetY();
+
+        SDL_Color outerCyan{0, 255, 220, 255};
+        SDL_Color innerWhite{200, 255, 255, 255};
+
+        primitiveRenderer->DrawCircle(px, py, 20.0f, outerCyan);
+        primitiveRenderer->DrawCircle(px, py, 10.0f, innerWhite);
+    }
+    if (currentState == GameState::Victory) {
+        SDL_SetRenderDrawColor(renderer, 15, 20, 30, 255);
+        SDL_RenderClear(renderer);
+
+        SDL_SetRenderDrawColor(renderer, 50, 255, 150, 255);
+        SDL_SetRenderScale(renderer, 4.0f, 4.0f);
+        SDL_RenderDebugText(renderer, 95.0f, 75.0f, "YOU WIN!");
+        SDL_SetRenderScale(renderer, 1.0f, 1.0f);
+
+        SDL_RenderPresent(renderer);
+        return;
+    }
 
 
     float screenDotX = camera.WorldToScreenX(400.0f);
     float screenDotY = camera.WorldToScreenY(300.0f);
     primitiveRenderer->DrawCircle(screenDotX, screenDotY, 15, red);
     tilemap.Draw(*primitiveRenderer, camera);
+    for (const auto& star : stars) {
+        if (star.collected) continue;
+
+        float sx = star.x - camera.GetX();
+        float sy = star.y - camera.GetY();
+        float r  = star.radius;
+        float diag = r * 0.7f;
+
+        SDL_Color gold{255, 215, 0, 255};
+        SDL_Color lightGold{255, 250, 160, 255};
+
+        primitiveRenderer->DrawLineSDL(sx - r, sy, sx + r, sy, gold);
+        primitiveRenderer->DrawLineSDL(sx, sy - r, sx, sy + r, gold);
+
+        primitiveRenderer->DrawLineSDL(sx - diag, sy - diag, sx + diag, sy + diag, lightGold);
+        primitiveRenderer->DrawLineSDL(sx - diag, sy + diag, sx + diag, sy - diag, lightGold);
+    }
     if (player)
     {
         player->Draw(*primitiveRenderer, camera);

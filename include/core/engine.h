@@ -11,6 +11,28 @@
 #include "game/player.h"
 #include "graphics/camera.h"
 #include "world/tilemap.h"
+#include "physics/collider.h"
+enum class GameState {
+    Playing,
+    Victory
+};
+
+struct Portal {
+    AABB triggerBox;
+    float centerX{0.0f};
+    float centerY{0.0f};
+    bool active{false};
+};
+struct Star {
+    float x{0.0f};
+    float y{0.0f};
+    float radius{12.0f};
+    bool collected{false};
+
+    AABB GetCollider() const {
+        return AABB(x - radius, y - radius, radius * 2.0f, radius * 2.0f);
+    }
+};
 class Engine
 {
 private:
@@ -33,7 +55,10 @@ private:
     BitmapHandler mapTileset;
     Tilemap tilemap;
     Camera camera;
-
+    std::vector<Star> stars;
+    int starsCollected{0};
+    GameState currentState{GameState::Playing};
+    Portal portal;
 public:
 
     Engine();
