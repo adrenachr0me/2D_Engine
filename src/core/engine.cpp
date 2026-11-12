@@ -124,7 +124,7 @@ bool Engine::Initialize(
         baseLeftX * tSize - padding,
         baseTopY  * tSize - padding,
         baseCols  * tSize + padding * 2.0f,
-        baseRows  * tSize + padding * 2.0f  
+        baseRows  * tSize + padding * 2.0f
     );
     portal.active = false;
     if (tilemap.CheckCollision(spawn.x, spawn.y, spawn.w, spawn.h))
@@ -183,21 +183,6 @@ void Engine::Update(float dt)
 
 void Engine::Render()
 {
-    ClearScreen(30,30,30);
-
-    SDL_Color red ={255,0,0,255};
-
-    SDL_Color green ={0,255,0,255};
-    if (portal.active) {
-        float px = portal.centerX - camera.GetX();
-        float py = portal.centerY - camera.GetY();
-
-        SDL_Color outerCyan{0, 255, 220, 255};
-        SDL_Color innerWhite{200, 255, 255, 255};
-
-        primitiveRenderer->DrawCircle(px, py, 20.0f, outerCyan);
-        primitiveRenderer->DrawCircle(px, py, 10.0f, innerWhite);
-    }
     if (currentState == GameState::Victory) {
         SDL_SetRenderDrawColor(renderer, 15, 20, 30, 255);
         SDL_RenderClear(renderer);
@@ -210,12 +195,22 @@ void Engine::Render()
         SDL_RenderPresent(renderer);
         return;
     }
-
-
-    float screenDotX = camera.WorldToScreenX(400.0f);
-    float screenDotY = camera.WorldToScreenY(300.0f);
-    primitiveRenderer->DrawCircle(screenDotX, screenDotY, 15, red);
+    ClearScreen(30,30,30);
     tilemap.Draw(*primitiveRenderer, camera);
+
+    if (portal.active) {
+        float px = portal.centerX - camera.GetX();
+        float py = portal.centerY - camera.GetY();
+
+        SDL_Color outerCyan{0, 255, 220, 255};
+        SDL_Color innerWhite{200, 255, 255, 255};
+
+        primitiveRenderer->DrawCircle(px, py, 20.0f, outerCyan);
+        primitiveRenderer->DrawCircle(px, py, 10.0f, innerWhite);
+    }
+
+
+
     for (const auto& star : stars) {
         if (star.collected) continue;
 
