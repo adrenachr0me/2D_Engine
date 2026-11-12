@@ -5,7 +5,7 @@
 #include "input.h"
 #include "timer.h"
 #include "error_handling.h"
-#include "PrimitiveRenderer.h"
+#include "primitiverenderer.h"
 #include "../graphics/point2D.h"
 #include "logs.h"
 #include "game/player.h"

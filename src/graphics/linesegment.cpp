@@ -1,6 +1,6 @@
 
 
-#include "LineSegment.h"
+#include "linesegment.h"
 #include "primitiverenderer.h"
 LineSegment::LineSegment()
 {

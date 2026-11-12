@@ -1,5 +1,5 @@
 #include "engine.h"
-#include "LineSegment.h"
+#include "linesegment.h"
 #include <iostream>
 
 Engine::Engine()

@@ -1,6 +1,6 @@
 
 
-#include "PrimitiveRenderer.h"
+#include "primitiverenderer.h"
 #include<math.h>
 #include <algorithm>
 #include <cmath>

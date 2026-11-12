@@ -1,7 +1,7 @@
 
 
 #include "../../include/graphics/point2D.h"
-#include "PrimitiveRenderer.h"
+#include "primitiverenderer.h"
 #include <cmath>
 
 Point2D::Point2D()
