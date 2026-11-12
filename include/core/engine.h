@@ -54,6 +54,9 @@ private:
     Player* player;
     BitmapHandler mapTileset;
     Tilemap tilemap;
+    Tilemap victoryMap;
+    float victoryStartX{960.0f};   // punkt, w którym gracz się pojawia
+    float victoryStartY{704.0f};
     Camera camera;
     std::vector<Star> stars;
     int starsCollected{0};
@@ -74,6 +77,7 @@ public:
     void Run();
     void ProcessEvents();
     void Update(float dt);
+    void DrawVictoryText();
     void Render();
     void ClearScreen(
     Uint8 r,
