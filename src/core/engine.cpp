@@ -79,6 +79,13 @@ bool Engine::Initialize(
         Shutdown();
         return false;
     }
+    if (!victoryMap.LoadFromFile(assetsPath + "victory.map", &mapTileset))
+    {
+        Log::Error("Failed to load assets/victory.map");
+        Shutdown();
+        return false;
+    }
+
 
     const float startX = 624.0f;
     const float startY = 1584.0f;
@@ -155,15 +162,28 @@ void Engine::ProcessEvents()
     }
 }
 
+
+
 void Engine::Update(float dt)
 {
+
     if (currentState == GameState::Victory) {
+        if (input.IsKeyDown(SDL_SCANCODE_ESCAPE)) running = false;
+
+        if (player) {
+            player->Update(dt, victoryMap);
+            camera.Follow(player->GetX(), player->GetY());
+        }
+        camera.ClampToBounds(static_cast<float>(victoryMap.GetWorldWidth()),
+                             static_cast<float>(victoryMap.GetWorldHeight()));
         return;
     }
+
     if (player) {
-        player->Update(dt,tilemap);
-        camera.Follow(player->GetX(),player->GetY());
+        player->Update(dt, tilemap);
+        camera.Follow(player->GetX(), player->GetY());
         AABB playerBox = player->GetCollider();
+
         for (auto& star : stars) {
             if (!star.collected && playerBox.Intersects(star.GetCollider())) {
                 star.collected = true;
@@ -173,28 +193,33 @@ void Engine::Update(float dt)
                 }
             }
         }
+
         if (portal.active && playerBox.Intersects(portal.triggerBox)) {
             currentState = GameState::Victory;
+            player->SetPosition(victoryStartX, victoryStartY);
+            camera.Follow(victoryStartX, victoryStartY);
+            camera.ClampToBounds(static_cast<float>(victoryMap.GetWorldWidth()),
+                                 static_cast<float>(victoryMap.GetWorldHeight()));
+            return;
         }
     }
 
-    camera.ClampToBounds(static_cast<float>(tilemap.GetWorldWidth()), static_cast<float>(tilemap.GetWorldHeight()));
+    camera.ClampToBounds(static_cast<float>(tilemap.GetWorldWidth()),
+                         static_cast<float>(tilemap.GetWorldHeight()));
 }
 
 void Engine::Render()
 {
     if (currentState == GameState::Victory) {
-        SDL_SetRenderDrawColor(renderer, 15, 20, 30, 255);
-        SDL_RenderClear(renderer);
-
-        SDL_SetRenderDrawColor(renderer, 50, 255, 150, 255);
-        SDL_SetRenderScale(renderer, 4.0f, 4.0f);
-        SDL_RenderDebugText(renderer, 95.0f, 75.0f, "YOU WIN!");
-        SDL_SetRenderScale(renderer, 1.0f, 1.0f);
-
+        ClearScreen(15, 20, 30);
+        victoryMap.Draw(*primitiveRenderer, camera);
+        if (player) player->Draw(*primitiveRenderer, camera);
+        DrawVictoryText();
         SDL_RenderPresent(renderer);
         return;
     }
+
+
     ClearScreen(30,30,30);
     tilemap.Draw(*primitiveRenderer, camera);
 
@@ -236,6 +261,31 @@ void Engine::Render()
 
 
     SDL_RenderPresent(renderer);
+}
+
+void Engine::DrawVictoryText()
+{
+    const float vw = static_cast<float>(camera.GetViewportWidth());
+
+    // ciemny panel pod tekstem, zeby bylo go widac na kafelkach
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 170);
+    SDL_FRect panel{vw / 2.0f - 450.0f, 70.0f, 900.0f, 180.0f};
+    SDL_RenderFillRect(renderer, &panel);
+
+    auto centered = [&](const std::string& text, float y, float scale,
+                        Uint8 r, Uint8 g, Uint8 b) {
+        SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+        SDL_SetRenderScale(renderer, scale, scale);
+        float x = (vw / scale - text.size() * 8.0f) / 2.0f;   // znak = 8 px
+        SDL_RenderDebugText(renderer, x, y / scale, text.c_str());
+        SDL_SetRenderScale(renderer, 1.0f, 1.0f);
+    };
+
+    centered("MISSION COMPLETE", 100.0f, 6.0f, 50, 255, 150);
+    centered("Stars collected: " + std::to_string(starsCollected) + "/3",
+             170.0f, 3.0f, 255, 215, 0);
+    centered("Press ESC to exit", 215.0f, 2.0f, 255, 255, 255);
 }
 
 void Engine::ClearScreen(
